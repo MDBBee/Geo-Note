@@ -11,38 +11,65 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-navigator.geolocation.getCurrentPosition(position => {
-  const { latitude } = position.coords;
-  const { longitude } = position.coords;
-
-  const map = L.map('map').setView([latitude, longitude], 13);
-
-  L.tileLayer('https://tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  }).addTo(map);
-
-  function onMapClick(e) {
-    // const { lat } = e.latlng;
-    // const { lng } = e.latlng;
-    form.classList.remove('hidden');
-    // L.marker([lat, lng]).addTo(map);
-    // //   .bindPopup(L.popup({ autoClose: false, closeOnClick: false }))
-    // //   .openPopup();
-    // const popup = L.popup({
-    //   autoClose: false,
-    //   closeOnClick: false,
-    //   maxWidth: 200,
-    //   minWidth: 100,
-    //   className: 'running-popup',
-    // });
-    // popup.setLatLng(e.latlng).setContent('Running').openOn(map);
+class App {
+  #coords;
+  constructor() {
+    navigator.geolocation.getCurrentPosition(
+      this._getPosition.bind(this),
+      function () {
+        alert('Location denied');
+      }
+    );
   }
 
-  map.on('click', onMapClick);
-});
+  _getPosition(position) {
+    const { latitude } = position.coords;
+    const { longitude } = position.coords;
+    this.#coords = [latitude, longitude];
+    this._loadMap(this.#coords);
+  }
 
-inputType.addEventListener('change', () => {
-  inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-  inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
-});
+  _loadMap(position) {
+    const map = L.map('map').setView(position, 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution:
+        '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    }).addTo(map);
+  }
+}
+
+// navigator.geolocation.getCurrentPosition(function (position) {
+//   const { latitude } = position.coords;
+//   const { longitude } = position.coords;
+//   const map = L.map('map').setView([latitude, longitude], 13);
+
+//   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+//     maxZoom: 19,
+//     attribution:
+//       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+//   }).addTo(map);
+
+//   function onMapClick(e) {
+//     const { lat } = e.latlng;
+//     const { lng } = e.latlng;
+
+//     const marker = L.marker([lat, lng])
+//       .addTo(map)
+//       .bindPopup(
+//         L.popup({
+//           maxWidth: 250,
+//           maxHeight: 100,
+//           autoClose: false,
+//           closeOnClick: false,
+//           className: 'cycling-popup',
+//         }).setContent('An exercise!')
+//       )
+//       .openPopup();
+//   }
+
+//   map.on('click', onMapClick);
+// });
+
+// const app = new App();
