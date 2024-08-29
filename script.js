@@ -115,15 +115,17 @@ class App {
     this._workoutlist(wkOut);
   }
   _workoutlist(wkOut) {
-    let html = '';
-    if (wkOut.name === 'Running') {
-      html += `
-              <li class="workout workout--${
-                wkOut.name[0].toLowerCase() + wkOut.name.slice(1)
-              }" data-id="${wkOut.id}">
+    console.log(wkOut);
+
+    let html = `
+         <li class="workout workout--${
+           wkOut.name[0].toLowerCase() + wkOut.name.slice(1)
+         }" data-id="${wkOut.id}">
                 <h2 class="workout__title">${wkOut.description}</h2>
                 <div class="workout__details">
-                  <span class="workout__icon">🏃‍♂️</span>
+                  <span class="workout__icon">${
+                    wkOut.name === 'Running' ? '🏃‍♂️' : '🚴‍♂️'
+                  }</span>
                   <span class="workout__value">${wkOut.distance}</span>
                   <span class="workout__unit">km</span>
                 </div>
@@ -131,43 +133,33 @@ class App {
                   <span class="workout__icon">⏱</span>
                   <span class="workout__value">${wkOut.duration}</span>
                   <span class="workout__unit">min</span>
-                </div>
+                </div>`;
+    if (wkOut.name === 'Running') {
+      html += `
                 <div class="workout__details">
                   <span class="workout__icon">⚡️</span>
-                  <span class="workout__value">${wkOut.speed}</span>
+                  <span class="workout__value">${wkOut.speed.toFixed(2)}</span>
                   <span class="workout__unit">min/km</span>
                 </div>
                 <div class="workout__details">
                   <span class="workout__icon">🦶🏼</span>
-                  <span class="workout__value">${wkOut.spm}</span>
+                  <span class="workout__value">${wkOut.spm.toFixed(2)}</span>
                   <span class="workout__unit">spm</span>
                 </div>
               </li>`;
     }
     if (wkOut.name === 'Cycling') {
       html += `
-              <li class="workout workout--${
-                wkOut.name[0].toLowerCase() + wkOut.name.slice(1)
-              }" data-id="${wkOut.id}">
-                <h2 class="workout__title">${wkOut.description}</h2>
-                <div class="workout__details">
-                  <span class="workout__icon">🚴‍♂️</span>
-                  <span class="workout__value">${wkOut.distance}</span>
-                  <span class="workout__unit">km</span>
-                </div>
-                <div class="workout__details">
-                  <span class="workout__icon">⏱</span>
-                  <span class="workout__value">${wkOut.duration}</span>
-                  <span class="workout__unit">min</span>
-                </div>
                 <div class="workout__details">
                   <span class="workout__icon">⚡️</span>
-                  <span class="workout__value">${wkOut.speed}</span>
+                  <span class="workout__value">${wkOut.speed.toFixed(2)}</span>
                   <span class="workout__unit">km/h</span>
                 </div>
                 <div class="workout__details">
                   <span class="workout__icon">⛰</span>
-                  <span class="workout__value">${wkOut.elevationGain}</span>
+                  <span class="workout__value">${+wkOut.elevationGain.toFixed(
+                    2
+                  )}</span>
                   <span class="workout__unit">m</span>
                 </div>
               </li>`;
@@ -185,7 +177,7 @@ class App {
     const allNumbers = inp => isFinite(inp);
 
     if (type === 'running') {
-      let cadence = inputCadence.value;
+      let cadence = +inputCadence.value;
       const inputs = [distance, duration, cadence];
       if (inputs.every(allPositive) && inputs.every(allNumbers)) {
         const run = new Running(distance, duration, cadence);
@@ -196,12 +188,12 @@ class App {
       } else alert('!all input filed should field with positive numbers');
     }
     if (type === 'cycling') {
-      let elevation = inputElevation.value;
+      let elevation = +inputElevation.value;
       const inputs = [distance, duration];
       if (inputs.every(allPositive) && inputs.every(allNumbers)) {
         const cycle = new Cycling(distance, duration, elevation);
         this.#workouts.push(cycle);
-        console.log(cycle);
+
         inputDistance.value = inputDuration.value = inputElevation.value = '';
         return cycle;
       } else alert('!all input filed should field with positive numbers');
