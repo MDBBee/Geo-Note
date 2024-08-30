@@ -8,9 +8,10 @@ class Workout {
   date = new Date();
   distance;
   duration;
-  constructor(distance, duration) {
+  constructor(distance, duration, coords) {
     this.distance = distance;
     this.duration = duration;
+    this.coords = coords;
   }
 
   _setDescription() {
@@ -24,8 +25,8 @@ class Workout {
 
 class Running extends Workout {
   name = 'Running';
-  constructor(distance, duration, cadence) {
-    super(distance, duration);
+  constructor(distance, duration, coords, cadence) {
+    super(distance, duration, coords);
     this.cadence = cadence;
     this.description = this._setDescription();
     this.spm = this._calcSPM();
@@ -42,8 +43,8 @@ class Running extends Workout {
 class Cycling extends Workout {
   name = 'Cycling';
 
-  constructor(distance, duration, elevationGain) {
-    super(distance, duration);
+  constructor(distance, duration, coords, elevationGain) {
+    super(distance, duration, coords);
     this.elevationGain = elevationGain;
     this.description = this._setDescription();
     this.speed = this._calcSpeed();
@@ -62,8 +63,6 @@ const inputDuration = document.querySelector('.form__input--duration');
 const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 
-// console.log(new Running(2, 4, 6));
-
 class App {
   #map;
   #markerE;
@@ -79,6 +78,14 @@ class App {
 
     inputType.addEventListener('change', this._toggleField);
     form.addEventListener('submit', this._newWorkout.bind(this));
+    containerWorkouts.addEventListener('click', this._gotoPositon.bind(this));
+  }
+
+  _gotoPositon(e) {
+    if (!e.target.closest('.workout')) return;
+    const uiId = e.target.closest('.workout').dataset.id;
+    const clicked = this.#workouts.find(wk => wk.id === uiId);
+    this.#map.setView(clicked.coords, 13);
   }
 
   _getPosition(position) {
@@ -103,6 +110,7 @@ class App {
     let wkOut;
     e.preventDefault();
     wkOut = this._retrieveteWorkoutData();
+    console.log(wkOut);
 
     //render Marker
     this._renderMarker(wkOut);
@@ -115,8 +123,6 @@ class App {
     this._workoutlist(wkOut);
   }
   _workoutlist(wkOut) {
-    console.log(wkOut);
-
     let html = `
          <li class="workout workout--${
            wkOut.name[0].toLowerCase() + wkOut.name.slice(1)
@@ -172,7 +178,9 @@ class App {
     let type = inputType.value;
     let distance = +inputDistance.value;
     let duration = +inputDuration.value;
-
+    //////
+    let coords = [this.#markerE.latlng.lat, this.#markerE.latlng.lng];
+    //////
     const allPositive = inp => inp > 0;
     const allNumbers = inp => isFinite(inp);
 
@@ -180,7 +188,7 @@ class App {
       let cadence = +inputCadence.value;
       const inputs = [distance, duration, cadence];
       if (inputs.every(allPositive) && inputs.every(allNumbers)) {
-        const run = new Running(distance, duration, cadence);
+        const run = new Running(distance, duration, coords, cadence);
         this.#workouts.push(run);
 
         inputDistance.value = inputDuration.value = inputCadence.value = '';
@@ -191,7 +199,7 @@ class App {
       let elevation = +inputElevation.value;
       const inputs = [distance, duration];
       if (inputs.every(allPositive) && inputs.every(allNumbers)) {
-        const cycle = new Cycling(distance, duration, elevation);
+        const cycle = new Cycling(distance, duration, coords, elevation);
         this.#workouts.push(cycle);
 
         inputDistance.value = inputDuration.value = inputElevation.value = '';
@@ -229,6 +237,7 @@ class App {
     inputDistance.focus();
   }
   _hideForm() {
+    // form.style.visibility = 'hidden';
     form.classList.add('hidden');
     inputDistance.blur();
   }
