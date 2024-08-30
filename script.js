@@ -69,6 +69,7 @@ class App {
   #workouts = [];
 
   constructor() {
+    this.#workouts = this._storage();
     navigator.geolocation.getCurrentPosition(
       this._getPosition.bind(this),
       function () {
@@ -81,6 +82,20 @@ class App {
     containerWorkouts.addEventListener('click', this._gotoPositon.bind(this));
   }
 
+  _renderLocalStoragedata() {
+    if (!this.#workouts) return;
+    this.#workouts.forEach(wk => {
+      // console.log(wk);
+      this._renderMarker(wk);
+      this._workoutlist(wk);
+    });
+  }
+
+  _storage() {
+    const stored = JSON.parse(localStorage.getItem('wkL'));
+    if (!stored) return [];
+    return stored;
+  }
   _gotoPositon(e) {
     if (!e.target.closest('.workout')) return;
     const uiId = e.target.closest('.workout').dataset.id;
@@ -104,13 +119,14 @@ class App {
       attribution:
         '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     }).addTo(this.#map);
+
+    this._renderLocalStoragedata();
   }
 
   _newWorkout(e) {
     let wkOut;
     e.preventDefault();
     wkOut = this._retrieveteWorkoutData();
-    console.log(wkOut);
 
     //render Marker
     this._renderMarker(wkOut);
@@ -192,6 +208,7 @@ class App {
         this.#workouts.push(run);
 
         inputDistance.value = inputDuration.value = inputCadence.value = '';
+        localStorage.setItem('wkL', JSON.stringify(this.#workouts));
         return run;
       } else alert('!all input filed should field with positive numbers');
     }
@@ -203,16 +220,15 @@ class App {
         this.#workouts.push(cycle);
 
         inputDistance.value = inputDuration.value = inputElevation.value = '';
+        localStorage.setItem('wkL', JSON.stringify(this.#workouts));
+
         return cycle;
       } else alert('!all input filed should field with positive numbers');
     }
   }
 
   _renderMarker(wkOut) {
-    const { lat } = this.#markerE.latlng;
-    const { lng } = this.#markerE.latlng;
-
-    const marker = L.marker([lat, lng])
+    const marker = L.marker(wkOut.coords)
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -237,7 +253,6 @@ class App {
     inputDistance.focus();
   }
   _hideForm() {
-    // form.style.visibility = 'hidden';
     form.classList.add('hidden');
     inputDistance.blur();
   }
@@ -247,37 +262,5 @@ class App {
     inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
   }
 }
-
-// navigator.geolocation.getCurrentPosition(function (position) {
-//   const { latitude } = position.coords;
-//   const { longitude } = position.coords;
-//   const map = L.map('map').setView([latitude, longitude], 13);
-
-//   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//     maxZoom: 19,
-//     attribution:
-//       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-//   }).addTo(map);
-
-//   function onMapClick(e) {
-//     const { lat } = e.latlng;
-//     const { lng } = e.latlng;
-
-//     const marker = L.marker([lat, lng])
-//       .addTo(map)
-//       .bindPopup(
-//         L.popup({
-//           maxWidth: 250,
-//           maxHeight: 100,
-//           autoClose: false,
-//           closeOnClick: false,
-//           className: 'cycling-popup',
-//         }).setContent('An exercise!')
-//       )
-//       .openPopup();
-//   }
-
-//   map.on('click', onMapClick);
-// });
 
 const app = new App();
