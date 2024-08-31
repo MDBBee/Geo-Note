@@ -255,6 +255,10 @@ class App {
   _hideForm() {
     form.classList.add('hidden');
     inputDistance.blur();
+    form.style.display = 'none';
+    setTimeout(() => {
+      form.style.display = 'grid';
+    }, 1000);
   }
 
   _toggleField() {
